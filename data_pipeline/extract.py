@@ -26,7 +26,7 @@ def data_update(query: str):
     return do_update
 
 # # # # # # # # # # # # #
-# Extract tiff to shape 
+# Upload du tif sur S3 
 # # # # # # # # # # # # #
 def extract_tif_data_and_upload(url: str, s3_key: str):
     with requests.get(url, stream=True) as r:
@@ -50,7 +50,7 @@ def check_tif_in_s3(bucket_name, s3_key):
     return False
 
 # # # # # # # # # #
-# Configuration S3
+# Configuration S3 --> à modifier pour D4G
 # # # # # # # # # #
 s3 = boto3.client(
     service_name = "s3",
