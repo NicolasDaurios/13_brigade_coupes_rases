@@ -28,7 +28,7 @@ def data_update(query: str):
 # # # # # # # # # # # # #
 # Upload du tif sur S3 
 # # # # # # # # # # # # #
-def extract_tif_data_and_upload(url: str, s3_key: str):
+def extract_tif_data_and_upload(url: str, s3_key: str, s3:str):
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         s3.upload_fileobj(r.raw, "brc-poc-etl", s3_key)
@@ -38,39 +38,17 @@ def extract_tif_data_and_upload(url: str, s3_key: str):
 # # # # # # # # # # # # # # # # # #
 # Présence du fichier dans le S3
 # # # # # # # # # # # # # # # # # # 
-def check_tif_in_s3(bucket_name, s3_key):
+def check_tif_in_s3(bucket_name, s3_key_prefix):
     s3 = boto3.client('s3')
-    result = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key)
+    result = s3.list_objects_v2(Bucket=bucket_name, Prefix=s3_key_prefix)
 
     if "Contents" in result:
         for obj in result["Contents"]:
-            if obj["Key"] == (s3_key):
-                return True
+            filename = obj["Key"].split("/")[-1]  
+            filename_without_date = filename.split('-')[0] + ".tif"  
             
+            # Vérifier si le fichier sans date est dans S3
+            if filename_without_date == "mosaics_tropisco_warnings_france_date.tif":
+                return True
+
     return False
-
-# # # # # # # # # #
-# Configuration S3 --> à modifier pour D4G
-# # # # # # # # # #
-s3 = boto3.client(
-    service_name = "s3",
-    region_name = "eu-west-3",
-    aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY"),
-)
-
-# # # # # # # # # # # # # #
-# Exécution des fonctions 
-# # # # # # # # # # # # # #
-
-# variables 
-api_query = "mosaics_tropisco_warnings_france_date.tif"
-url = "https://zenodo.org/records/13685177/files/mosaics_tropisco_warnings_france_date.tif?download=1"
-s3_key = "data/mosaics_tropisco_warnings_france_date.tif"
-bucket_name = "brc-poc-etl"
-
-if __name__ == "__main__":
-    if data_update(api_query) or check_tif_in_s3(bucket_name, s3_key):
-        print("✅ Les données sont déjà à jour, pas besoin de télécharger à nouveau")
-    else:
-        extract_tif_data_and_upload(url, s3_key)
