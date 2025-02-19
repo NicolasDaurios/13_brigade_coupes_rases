@@ -1,29 +1,59 @@
 import os
+import json
 import boto3
 import requests
 from datetime import datetime
 
 
+# # # # # # # # # # # #
+# Update de la metadata
+# # # # # # # # # # # #
+def update_metadata(meta_data, bucket_name, s3_key, incr_version=0.0):
+    meta_data = {
+        "version": 1.0+incr_version,
+        "s3_key": s3_key,
+        "bucket_name": bucket_name,
+        "data_source_link": meta_data['links']['self'],
+        "date_source": meta_data['updated'],
+        "file_name": meta_data['key'],
+        "date_extract": "2025-02-18",
+        "size": meta_data['size'],
+        "mimetype": meta_data['mimetype'],
+        "metadata": {
+            "width": meta_data['metadata']['width'],
+            "height": meta_data['metadata']['height']
+        }
+    }
+    
+    return meta_data
+
 # # # # # # # # # # # # # # # # # # #
 # Vérification des données meta data 
 # # # # # # # # # # # # # # # # # # # 
-def data_update(query: str):
-    # Récup api
+def data_update(query: str, bucket_name: str, s3_key_metadata: str, s3_key: str):
     url = f"https://zenodo.org/api/records/13685177/files/{query}"
     response = requests.get(url, stream=True)
     if response.status_code == 200:
-        data = dict(response.json())
+        data = response.json()
     else:
-        raise Exception(f"Erreur lors de la requête : {response.status_code}")
-    
-    # Parser les données dates
-    date_format = "%Y-%m-%dT%H:%M:%S"
-    base_date = datetime.strptime("2024-09-13T08:08:10.342532+00:00".split(".")[0], date_format)
-    date_extracted = datetime.strptime(data["updated"].split(".")[0], date_format)
-    do_update = base_date < date_extracted
+        raise Exception(f"Erreur lors de la requête API : {response.status_code}")
 
-    print(f"✅ Inspection de la metadata fait, réponse à mise à jour requise : {do_update}")
-    return do_update
+    s3 = boto3.client("s3")
+    metadata_object = s3.get_object(Bucket=bucket_name, Key=s3_key_metadata)
+    metadata_content = metadata_object["Body"].read().decode("utf-8")
+    metadata = json.loads(metadata_content)
+
+    date_format = "%Y-%m-%dT%H:%M:%S"
+    base_date = datetime.strptime(metadata["date_source"].split(".")[0], date_format)
+    date_extracted = datetime.strptime(data["updated"].split(".")[0], date_format)
+
+    do_update = base_date < date_extracted
+    if do_update:
+        metadata = update_metadata(data, bucket_name, s3_key, 0.1)
+
+    print(f"✅ Inspection de la metadata effectuée, mise à jour requise : {do_update}")
+
+    return (metadata, do_update) if not do_update else (metadata, True)
 
 # # # # # # # # # # # # #
 # Upload du tif sur S3 
