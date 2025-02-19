@@ -10,13 +10,13 @@ from datetime import datetime
 # # # # # # # # # # # #
 def update_metadata(meta_data, bucket_name, s3_key, incr_version=0.0):
     meta_data = {
-        "version": 1.0+incr_version,
+        "version": 1.0 + incr_version,
         "s3_key": s3_key,
         "bucket_name": bucket_name,
         "data_source_link": meta_data['links']['self'],
         "date_source": meta_data['updated'],
         "file_name": meta_data['key'],
-        "date_extract": "2025-02-18",
+        "date_extract": datetime.now().strftime("%Y-%m-%d"),
         "size": meta_data['size'],
         "mimetype": meta_data['mimetype'],
         "metadata": {
