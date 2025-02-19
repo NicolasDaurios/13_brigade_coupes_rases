@@ -75,10 +75,9 @@ def check_tif_in_s3(bucket_name, s3_key_prefix):
     if "Contents" in result:
         for obj in result["Contents"]:
             filename = obj["Key"].split("/")[-1]  
-            filename_without_date = filename.split('-')[0] + ".tif"  
             
             # Vérifier si le fichier sans date est dans S3
-            if filename_without_date == "mosaics_tropisco_warnings_france_date.tif":
+            if filename == "mosaics_tropisco_warnings_france_date.tif":
                 return True
 
     return False
