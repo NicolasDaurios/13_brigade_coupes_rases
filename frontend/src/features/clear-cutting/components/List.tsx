@@ -1,15 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { DisplayTypeMenu } from "@/features/clear-cutting/components/shared/DisplayTypeMenu";
 import { Filters } from "@/features/clear-cutting/components/shared/Filters";
 import { useGetClearCuttingsQuery } from "@/features/clear-cutting/store/api";
 import Camera from "@mui/icons-material/CameraAltOutlined";
+import { useNavigate } from "@tanstack/react-router";
+
 export function AsideList() {
 	const { data } = useGetClearCuttingsQuery();
+	const navigate = useNavigate();
 
 	return (
 		<>
-			<DisplayTypeMenu />
 			<Filters />
 			<ul className="grid grid-cols-1 gap-6 lg:grid-cols-2 overflow-auto ">
 				{data?.clearCuttingPreviews.map((clearCutting) => (
@@ -17,7 +18,7 @@ export function AsideList() {
 						key={clearCutting.id}
 						className="col-span-1 flex flex-col divide-y divide-gray-200  rounded-lg bg-white text-center shadow"
 					>
-						<Card>
+						<Card className="cursor-pointer" onClick={() => navigate({ to: '/map/report/$reportId', params : { reportId: clearCutting.id}})}>
 							<CardContent className="pt-6">
 								{clearCutting.imageUrl && (
 									<div

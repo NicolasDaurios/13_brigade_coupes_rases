@@ -16,11 +16,18 @@ import { Route as rootRoute } from './routes/__root'
 
 // Create Virtual Routes
 
+const MapLazyImport = createFileRoute('/map')()
 const IndexLazyImport = createFileRoute('/')()
-const ClearCuttingsMapLazyImport = createFileRoute('/clear-cuttings/map')()
-const ClearCuttingsListLazyImport = createFileRoute('/clear-cuttings/list')()
+const MapListLazyImport = createFileRoute('/map/list')()
+const MapReportReportIdLazyImport = createFileRoute('/map/report/$reportId')()
 
 // Create/Update Routes
+
+const MapLazyRoute = MapLazyImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/map.lazy').then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: '/',
@@ -28,20 +35,18 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
-const ClearCuttingsMapLazyRoute = ClearCuttingsMapLazyImport.update({
-  id: '/clear-cuttings/map',
-  path: '/clear-cuttings/map',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() =>
-  import('./routes/clear-cuttings.map.lazy').then((d) => d.Route),
-)
+const MapListLazyRoute = MapListLazyImport.update({
+  id: '/list',
+  path: '/list',
+  getParentRoute: () => MapLazyRoute,
+} as any).lazy(() => import('./routes/map/list.lazy').then((d) => d.Route))
 
-const ClearCuttingsListLazyRoute = ClearCuttingsListLazyImport.update({
-  id: '/clear-cuttings/list',
-  path: '/clear-cuttings/list',
-  getParentRoute: () => rootRoute,
+const MapReportReportIdLazyRoute = MapReportReportIdLazyImport.update({
+  id: '/report/$reportId',
+  path: '/report/$reportId',
+  getParentRoute: () => MapLazyRoute,
 } as any).lazy(() =>
-  import('./routes/clear-cuttings.list.lazy').then((d) => d.Route),
+  import('./routes/map/report.$reportId.lazy').then((d) => d.Route),
 )
 
 // Populate the FileRoutesByPath interface
@@ -55,63 +60,84 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/clear-cuttings/list': {
-      id: '/clear-cuttings/list'
-      path: '/clear-cuttings/list'
-      fullPath: '/clear-cuttings/list'
-      preLoaderRoute: typeof ClearCuttingsListLazyImport
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapLazyImport
       parentRoute: typeof rootRoute
     }
-    '/clear-cuttings/map': {
-      id: '/clear-cuttings/map'
-      path: '/clear-cuttings/map'
-      fullPath: '/clear-cuttings/map'
-      preLoaderRoute: typeof ClearCuttingsMapLazyImport
-      parentRoute: typeof rootRoute
+    '/map/list': {
+      id: '/map/list'
+      path: '/list'
+      fullPath: '/map/list'
+      preLoaderRoute: typeof MapListLazyImport
+      parentRoute: typeof MapLazyImport
+    }
+    '/map/report/$reportId': {
+      id: '/map/report/$reportId'
+      path: '/report/$reportId'
+      fullPath: '/map/report/$reportId'
+      preLoaderRoute: typeof MapReportReportIdLazyImport
+      parentRoute: typeof MapLazyImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface MapLazyRouteChildren {
+  MapListLazyRoute: typeof MapListLazyRoute
+  MapReportReportIdLazyRoute: typeof MapReportReportIdLazyRoute
+}
+
+const MapLazyRouteChildren: MapLazyRouteChildren = {
+  MapListLazyRoute: MapListLazyRoute,
+  MapReportReportIdLazyRoute: MapReportReportIdLazyRoute,
+}
+
+const MapLazyRouteWithChildren =
+  MapLazyRoute._addFileChildren(MapLazyRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
-  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
-  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexLazyRoute
-  '/clear-cuttings/list': typeof ClearCuttingsListLazyRoute
-  '/clear-cuttings/map': typeof ClearCuttingsMapLazyRoute
+  '/map': typeof MapLazyRouteWithChildren
+  '/map/list': typeof MapListLazyRoute
+  '/map/report/$reportId': typeof MapReportReportIdLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clear-cuttings/list' | '/clear-cuttings/map'
+  fullPaths: '/' | '/map' | '/map/list' | '/map/report/$reportId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clear-cuttings/list' | '/clear-cuttings/map'
-  id: '__root__' | '/' | '/clear-cuttings/list' | '/clear-cuttings/map'
+  to: '/' | '/map' | '/map/list' | '/map/report/$reportId'
+  id: '__root__' | '/' | '/map' | '/map/list' | '/map/report/$reportId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  ClearCuttingsListLazyRoute: typeof ClearCuttingsListLazyRoute
-  ClearCuttingsMapLazyRoute: typeof ClearCuttingsMapLazyRoute
+  MapLazyRoute: typeof MapLazyRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  ClearCuttingsListLazyRoute: ClearCuttingsListLazyRoute,
-  ClearCuttingsMapLazyRoute: ClearCuttingsMapLazyRoute,
+  MapLazyRoute: MapLazyRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -125,18 +151,26 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/clear-cuttings/list",
-        "/clear-cuttings/map"
+        "/map"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/clear-cuttings/list": {
-      "filePath": "clear-cuttings.list.lazy.tsx"
+    "/map": {
+      "filePath": "map.lazy.tsx",
+      "children": [
+        "/map/list",
+        "/map/report/$reportId"
+      ]
     },
-    "/clear-cuttings/map": {
-      "filePath": "clear-cuttings.map.lazy.tsx"
+    "/map/list": {
+      "filePath": "map/list.lazy.tsx",
+      "parent": "/map"
+    },
+    "/map/report/$reportId": {
+      "filePath": "map/report.$reportId.lazy.tsx",
+      "parent": "/map"
     }
   }
 }

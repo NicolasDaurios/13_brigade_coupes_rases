@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 
 import "./index.css";
 import { store } from "./shared/store/store";
+import { MapProvider, useMapInstance } from "./features/clear-cutting/components/map/Map.context";
 async function enableMocking() {
 	if (import.meta.env.MODE !== "development") {
 		return;
@@ -18,11 +19,19 @@ async function enableMocking() {
 	return worker.start();
 }
 
+function App() {
+	return (
+		<MapProvider>
+			<RouterProvider router={router} />
+		</MapProvider>
+	)
+}
+
 enableMocking().then(() => {
 	createRoot(document.getElementById("root") as HTMLElement).render(
 		<StrictMode>
 			<Provider store={store}>
-				<RouterProvider router={router} />
+				<App />
 			</Provider>
 		</StrictMode>,
 	);

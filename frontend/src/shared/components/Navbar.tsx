@@ -9,16 +9,16 @@ export function Navbar({ className }: Props) {
 		<nav
 			className={clsx(
 				className,
-				"fixed flex top-0 bg-white shadow w-full items-center z-max",
+				"flex-col h-screen bg-[#204933] shadow items-center z-max w-32",
 			)}
 		>
 			<img
 				alt="Canopée"
-				src="https://www.canopee.ong/wp-content/uploads/2023/08/logo-canopee.png"
-				className="h-8 w-auto px-6 "
+				src="src/assets/canopee_icon-blanc-simplifiee-rvb.png"
+				className="h-auto w-auto aspect-square object-cover pt-6 px-4"
 			/>
-			<div className="flex grow h-full">
-				<Link
+			<div className="flex grow">
+				{/* <Link
 					to="/clear-cuttings/map"
 					activeProps={{
 						className: "border-green-500  text-gray-900",
@@ -30,7 +30,7 @@ export function Navbar({ className }: Props) {
 					className="inline-flex items-center border-b-2 h-full px-1 pt-1 text-sm font-medium "
 				>
 					Coupes rases
-				</Link>
+				</Link> */}
 			</div>
 		</nav>
 	);
