@@ -1,7 +1,10 @@
 import os
+import gzip
 import json
 import boto3
+import shutil
 import requests
+from tqdm import tqdm
 from datetime import datetime
 
 
@@ -81,3 +84,27 @@ def check_tif_in_s3(bucket_name, s3_key_prefix):
                 return True
 
     return False
+
+# # # # # # # # # # # # # # # # # #
+# Récupération des données cadastres
+# # # # # # # # # # # # # # # # # # 
+def download_file(url, filename):
+    response = requests.get(url, stream=True)
+    total_size = int(response.headers.get("content-length", 0))
+    block_size = 1024  # 1 KB
+    progress_bar = tqdm(total=total_size, unit="B", unit_scale=True)
+
+    with open(filename, "wb") as f:
+        for data in response.iter_content(block_size):
+            progress_bar.update(len(data))
+            f.write(data)
+
+    progress_bar.close()
+    print(f"📥 Téléchargement terminé : {filename}")
+
+# ✅ Décompression du fichier .gz
+def decompress_gz(input_file, output_file):
+    with gzip.open(input_file, "rb") as f_in:
+        with open(output_file, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+    print(f"📂 Décompression terminée : {output_file}")
