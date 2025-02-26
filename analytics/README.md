@@ -6,6 +6,22 @@
 
 - `data/ign/bdalti25/slope_gte_30.fgb` is the vectorized version of `/data/ign/bdalti25/slope_gte_30.tif`
 
+- data/natura2000/Natura2000.shp : A set of geospatial files defining protected areas under the EU Natura 2000 network.  
+  - **SITECODE**: Unique identifier for each protected site.  
+  - **SITENAME**: Official name of the Natura 2000 site.  
+  - **Area (km² & m²)**: Total surface area of the site in square kilometers and square meters.  
+  - **Geospatial data**: Polygon geometries defining the spatial extent of the sites.  
+  - **Classification**: The sites belong to one of two categories:  
+    - **ZPS (Zones de Protection Spéciales)**: Special Protection Areas (SPA) under the EU Birds Directive.  
+    - **ZSC (Zones Spéciales de Conservation)**: Special Areas of Conservation (SAC) under the EU Habitats Directive.  
+
+### Files:
+  - **.shp**: Main geometry file containing the spatial boundaries.  
+  - **.dbf**: Attribute data including SITECODE, SITENAME, area, and classification.  
+  - **.prj**: Projection information.  
+  - **.shx**: Spatial index for quick access.  
+  - **.cpg**: Character encoding file for attribute data.  
+
 ## How to download the preprocessed data
 
 - Get your Scaleway credentials from Vaultwarden.
